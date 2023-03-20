@@ -1,14 +1,36 @@
+import { SessionProvider } from "$/context/SessionContext";
+import { router } from "$/routes/router";
+import { CssBaseline } from "@mui/joy";
+import GlobalStyles from "@mui/joy/GlobalStyles";
+import { CssVarsProvider } from "@mui/joy/styles";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./index.css";
-import { CssVarsProvider } from "@mui/joy/styles";
-import "@fontsource/public-sans";
+import { RouterProvider } from "react-router-dom";
+import theme from "./theme";
+
+const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
-        <CssVarsProvider>
-            <App />
+        <CssVarsProvider theme={theme}>
+            <CssBaseline />
+            <GlobalStyles
+                styles={{
+                    ":root": {
+                        "--Collapsed-breakpoint": "769px", // form will stretch when viewport is below `769px`
+                        "--Cover-width": "40vw", // must be `vw` only
+                        "--Form-maxWidth": "700px",
+                    },
+                }}
+            />
+            <SessionProvider>
+                <QueryClientProvider client={queryClient}>
+                    <RouterProvider router={router} />
+                    <ReactQueryDevtools initialIsOpen />
+                </QueryClientProvider>
+            </SessionProvider>
         </CssVarsProvider>
     </React.StrictMode>
 );
