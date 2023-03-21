@@ -9,17 +9,9 @@ import Input from "@mui/joy/Input";
 import Link from "@mui/joy/Link";
 import Typography from "@mui/joy/Typography";
 import type { SignUpWithPasswordCredentials } from "@supabase/supabase-js";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Link as RouterLink, useLocation } from "react-router-dom";
-
-interface FormElements extends HTMLFormControlsCollection {
-    email: HTMLInputElement;
-    password: HTMLInputElement;
-    persistent: HTMLInputElement;
-}
-interface SignInFormElement extends HTMLFormElement {
-    readonly elements: FormElements;
-}
 
 type AuthLayoutProps = {
     /**
@@ -28,20 +20,32 @@ type AuthLayoutProps = {
     signupPage?: boolean;
 };
 
+type FormData = {
+    email: string;
+    password: string;
+};
+
 const AuthLayout: React.FC<AuthLayoutProps> = (props) => {
     const { signupPage } = props;
     const { pathname } = useLocation();
 
-    const formRef = useRef<HTMLFormElement | null>(null);
+    const {
+        register,
+        handleSubmit,
+        setError,
+        reset,
+        formState: { errors },
+    } = useForm<FormData>();
+    const onSubmit = handleSubmit((data) => {
+        handleFormSubmit(data);
+    });
+
+    useEffect(() => {
+        reset();
+    }, [pathname, reset]);
+
     const [loading, setLoading] = useState(false);
     const text = getText(props);
-
-    // Reset the form if changing pages
-    useEffect(() => {
-        if (formRef.current) {
-            formRef.current.reset();
-        }
-    }, [pathname]);
 
     const handleFormSubmit = async (values: SignUpWithPasswordCredentials) => {
         setLoading(true);
@@ -57,16 +61,15 @@ const AuthLayout: React.FC<AuthLayoutProps> = (props) => {
 
     const handleLogin = async (values: SignUpWithPasswordCredentials) => {
         try {
-            const { data, error } = await supabase.auth.signInWithPassword(
-                values
-            );
+            const { error } = await supabase.auth.signInWithPassword(values);
 
             if (error) {
-                console.log({ err1: error });
+                setError("root", {
+                    type: "auth",
+                    message: "Invalid email or password",
+                });
                 throw Error;
             }
-
-            console.log({ data });
         } catch (err) {
             console.log({ err2: err });
         }
@@ -177,27 +180,16 @@ const AuthLayout: React.FC<AuthLayoutProps> = (props) => {
                                 {text.title}
                             </Typography>
                         </div>
-                        <form
-                            ref={formRef}
-                            onSubmit={(
-                                event: React.FormEvent<SignInFormElement>
-                            ) => {
-                                event.preventDefault();
-                                const formElements =
-                                    event.currentTarget.elements;
-                                const values = {
-                                    email: formElements.email.value,
-                                    password: formElements.password.value,
-                                };
-                                handleFormSubmit(values);
-                            }}
-                        >
+                        <form onSubmit={onSubmit}>
                             <FormControl required>
                                 <FormLabel>Email</FormLabel>
                                 <Input
                                     placeholder="Enter your email"
                                     type="email"
-                                    name="email"
+                                    // name="email"
+                                    slotProps={{
+                                        input: register("email"),
+                                    }}
                                 />
                             </FormControl>
                             <FormControl required>
@@ -206,8 +198,18 @@ const AuthLayout: React.FC<AuthLayoutProps> = (props) => {
                                     placeholder="•••••••"
                                     type="password"
                                     name="password"
+                                    slotProps={{
+                                        input: register("password"),
+                                    }}
                                 />
                             </FormControl>
+
+                            {errors.root && (
+                                <Typography color="danger" fontSize="sm">
+                                    {errors.root.message}
+                                </Typography>
+                            )}
+
                             <Button
                                 type="submit"
                                 fullWidth
