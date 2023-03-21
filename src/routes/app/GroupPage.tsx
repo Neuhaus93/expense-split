@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 
 const GroupPage = () => {
     const { groupId } = useParams();
-    const { data } = useGroup({ params: { id: groupId } });
+    const { data } = useGroup({ params: { id: Number(groupId) } });
 
     if (!data) {
         return <div>Loading...</div>;

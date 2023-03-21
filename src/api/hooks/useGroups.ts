@@ -5,7 +5,10 @@ export const useGroups = () => {
     return useQuery({
         queryKey: ["groups"],
         queryFn: async () => {
-            const res = await supabase.from("groups").select();
+            const res = await supabase
+                .from("groups")
+                .select()
+                .order("created_at", { ascending: false });
 
             return {
                 count: res.count,

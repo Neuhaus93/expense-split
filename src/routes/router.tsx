@@ -4,6 +4,7 @@ import HomePage from "$/routes/app/HomePage";
 import AuthLayout from "$/routes/auth/AuthLayout";
 import { useContext } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import Layout from "$/components/Layout";
 
 /**
  * Just authenticated users can access protected routes
@@ -40,17 +41,23 @@ export const router = createBrowserRouter([
         path: "/app",
         element: (
             <ProtectedRoute>
-                <HomePage />
+                <Layout />
             </ProtectedRoute>
         ),
-    },
-    {
-        path: "/app/group/:groupId",
-        element: (
-            <ProtectedRoute>
-                <GroupPage />
-            </ProtectedRoute>
-        ),
+        children: [
+            {
+                index: true,
+                element: <HomePage />,
+            },
+            {
+                path: "/app/group/:groupId",
+                element: (
+                    <ProtectedRoute>
+                        <GroupPage />
+                    </ProtectedRoute>
+                ),
+            },
+        ],
     },
     {
         path: "/auth/login",

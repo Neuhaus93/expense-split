@@ -6,3 +6,4 @@ export type Groups = {
     result: GroupTable["Row"][];
     count: number;
 };
+export type Group = GroupTable["Row"];

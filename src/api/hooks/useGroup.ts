@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 type UseGroup = {
     params?: {
-        id?: string;
+        id?: number;
     };
 };
 
@@ -11,7 +11,7 @@ export const useGroup = (args = {} as UseGroup) => {
     const { params = {} } = args;
 
     return useQuery({
-        queryKey: ["group", { params }],
+        queryKey: ["group", params],
         queryFn: async () => {
             const res = await supabase
                 .from("groups")
@@ -26,6 +26,6 @@ export const useGroup = (args = {} as UseGroup) => {
     });
 };
 
-function verifyId(id: string | undefined) {
-    return typeof id === "string" && id.length > 0 && !isNaN(parseInt(id));
+function verifyId(id: number | undefined) {
+    return typeof id === "number" && !isNaN(id);
 }

@@ -2,7 +2,7 @@ import { useCreateGroup } from "$/api/hooks/useCreateGroup";
 import { useGroups } from "$/api/hooks/useGroups";
 import { Box, Button, Card, Grid, Input, Link, Typography } from "@mui/joy";
 import { useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 const createGroupInitialValues = {
     name: "",
@@ -10,6 +10,8 @@ const createGroupInitialValues = {
 };
 
 const HomePage: React.FC = () => {
+    const navigate = useNavigate();
+
     const { data } = useGroups();
     const { mutateAsync, isLoading } = useCreateGroup();
     const [createGroupValues, setCreateGroupValues] = useState(
@@ -47,6 +49,7 @@ const HomePage: React.FC = () => {
                                             level="body1"
                                             underline="none"
                                             sx={{ mb: 1 }}
+                                            color="neutral"
                                         >
                                             {group.name}
                                         </Link>
@@ -68,7 +71,13 @@ const HomePage: React.FC = () => {
                 component="form"
                 onSubmit={async (event) => {
                     event.preventDefault();
-                    await mutateAsync(createGroupValues);
+
+                    try {
+                        const newGroup = await mutateAsync(createGroupValues);
+                        navigate(`/app/group/${newGroup.id}`);
+                    } catch (err) {
+                        console.log(err);
+                    }
                     setCreateGroupValues(createGroupInitialValues);
                 }}
             >
