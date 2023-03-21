@@ -1,9 +1,12 @@
-import App from "$/App";
+import HomePage from "$/routes/app/HomePage";
 import { SessionContext } from "$/context/SessionContext";
 import AuthLayout from "$/routes/auth/AuthLayout";
 import { useContext } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
+/**
+ * Just authenticated users can access protected routes
+ */
 const ProtectedRoute = (props: { children: JSX.Element }): JSX.Element => {
     const session = useContext(SessionContext);
 
@@ -14,6 +17,9 @@ const ProtectedRoute = (props: { children: JSX.Element }): JSX.Element => {
     return props.children;
 };
 
+/**
+ * Just unauthenticated users can access auth routes
+ */
 const AuthRoute = (props: { children: JSX.Element }): JSX.Element => {
     const session = useContext(SessionContext);
 
@@ -27,9 +33,13 @@ const AuthRoute = (props: { children: JSX.Element }): JSX.Element => {
 export const router = createBrowserRouter([
     {
         path: "/",
+        element: <Navigate to="/app" replace />,
+    },
+    {
+        path: "/app",
         element: (
             <ProtectedRoute>
-                <App />
+                <HomePage />
             </ProtectedRoute>
         ),
     },
