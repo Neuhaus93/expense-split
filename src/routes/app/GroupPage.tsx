@@ -1,5 +1,6 @@
 import { useGroup, type Group } from "$/api/hooks/useGroup";
-import { formatDateToDateInput } from "$/utils/date";
+import { formatDate, formatDateForDateInput } from "$/utils/date";
+import { formatCents } from "$/utils/currency";
 import {
     Box,
     Button,
@@ -19,8 +20,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
 import { useParams } from "react-router-dom";
-import { useCreateExpense } from "../../api/hooks/useCreateExpense";
-import { useExpenses, type Expenses } from "../../api/hooks/useExpenses";
+import { useCreateExpense } from "$/api/hooks/useCreateExpense";
+import { useExpenses, type Expenses } from "$/api/hooks/useExpenses";
 
 const GroupPage = () => {
     const { groupId } = useParams();
@@ -84,7 +85,7 @@ const ExpensesList: React.FC<{
         <Box
             sx={{
                 mt: 3,
-                "& div + div": {
+                "& > div + div": {
                     mt: 1.5,
                 },
             }}
@@ -93,15 +94,33 @@ const ExpensesList: React.FC<{
                 <Sheet
                     variant="outlined"
                     key={expense.id}
-                    sx={{ borderRadius: 8, p: 1.5 }}
+                    sx={{
+                        borderRadius: 8,
+                        p: 1.5,
+                        display: "flex",
+                        justifyContent: "space-between",
+                    }}
                 >
-                    <Typography level="h6">{expense.name}</Typography>
-                    <Typography sx={{ mt: 0.5 }}>
-                        Paid by{" "}
-                        <Typography component="span" fontWeight="bold">
-                            {getMemberAlias(expense.paid_by)}
+                    <div>
+                        <Typography level="h6">{expense.name}</Typography>
+                        <Typography sx={{ mt: 0.5 }}>
+                            Paid by{" "}
+                            <Typography component="span" fontWeight="bold">
+                                {getMemberAlias(expense.paid_by)}
+                            </Typography>
                         </Typography>
-                    </Typography>
+                    </div>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "flex-end",
+                            justifyContent: "space-between",
+                        }}
+                    >
+                        <Typography>{formatCents(expense.cents)}</Typography>
+                        <Typography>{formatDate(expense.date)}</Typography>
+                    </Box>
                 </Sheet>
             ))}
         </Box>
@@ -129,7 +148,7 @@ const GroupForm: React.FC<{ group: NonNullable<Group> }> = ({ group }) => {
 
     const { handleSubmit, register, setValue } = useForm<FormData>({
         defaultValues: {
-            date: formatDateToDateInput(new Date()),
+            date: formatDateForDateInput(new Date()),
         },
     });
 
