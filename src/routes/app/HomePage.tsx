@@ -1,7 +1,8 @@
 import { useCreateGroup } from "$/api/hooks/useCreateGroup";
 import { useGroups } from "$/api/hooks/useGroups";
-import { Box, Button, Card, Grid, Input, Typography } from "@mui/joy";
+import { Box, Button, Card, Grid, Input, Link, Typography } from "@mui/joy";
 import { useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 
 const createGroupInitialValues = {
     name: "",
@@ -31,7 +32,6 @@ const HomePage: React.FC = () => {
                                         variant="outlined"
                                         sx={{
                                             height: "100px",
-                                            cursor: "pointer",
                                             "&:hover": {
                                                 boxShadow: "md",
                                                 borderColor:
@@ -39,13 +39,17 @@ const HomePage: React.FC = () => {
                                             },
                                         }}
                                     >
-                                        <Typography
+                                        <Link
+                                            component={RouterLink}
+                                            overlay
+                                            to={`/app/group/${group.id}`}
                                             fontWeight="bold"
                                             level="body1"
+                                            underline="none"
                                             sx={{ mb: 1 }}
                                         >
                                             {group.name}
-                                        </Typography>
+                                        </Link>
                                         <Typography level="body2">
                                             {group.description}
                                         </Typography>

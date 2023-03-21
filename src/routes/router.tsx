@@ -1,5 +1,6 @@
-import HomePage from "$/routes/app/HomePage";
 import { SessionContext } from "$/context/SessionContext";
+import GroupPage from "$/routes/app/GroupPage";
+import HomePage from "$/routes/app/HomePage";
 import AuthLayout from "$/routes/auth/AuthLayout";
 import { useContext } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
@@ -40,6 +41,14 @@ export const router = createBrowserRouter([
         element: (
             <ProtectedRoute>
                 <HomePage />
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: "/app/group/:groupId",
+        element: (
+            <ProtectedRoute>
+                <GroupPage />
             </ProtectedRoute>
         ),
     },
