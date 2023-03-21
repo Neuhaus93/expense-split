@@ -22,7 +22,7 @@ module.exports = {
         "plugin:react/jsx-runtime",
     ],
     parser: "@typescript-eslint/parser",
-    plugins: ["@typescript-eslint"],
+    plugins: ["@typescript-eslint", "react-refresh"],
     settings: {
         react: {
             version: "detect",
@@ -30,5 +30,7 @@ module.exports = {
     },
     rules: {
         "react/prop-types": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "react-refresh/only-export-components": "warn",
     },
 };

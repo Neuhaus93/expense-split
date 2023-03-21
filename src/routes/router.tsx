@@ -1,10 +1,10 @@
+import Layout from "$/components/Layout";
 import { SessionContext } from "$/context/SessionContext";
 import GroupPage from "$/routes/app/GroupPage";
 import HomePage from "$/routes/app/HomePage";
 import AuthLayout from "$/routes/auth/AuthLayout";
 import { useContext } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import Layout from "$/components/Layout";
 
 /**
  * Just authenticated users can access protected routes

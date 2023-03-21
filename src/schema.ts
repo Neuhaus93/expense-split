@@ -9,18 +9,36 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      countries: {
+      expenses: {
         Row: {
+          cents: number
+          created_at: string
+          date: string
+          group_id: number
           id: number
           name: string
+          paid_by: number
+          paid_to: Json[]
         }
         Insert: {
+          cents: number
+          created_at?: string
+          date: string
+          group_id: number
           id?: number
           name: string
+          paid_by: number
+          paid_to: Json[]
         }
         Update: {
+          cents?: number
+          created_at?: string
+          date?: string
+          group_id?: number
           id?: number
           name?: string
+          paid_by?: number
+          paid_to?: Json[]
         }
       }
       groups: {
@@ -41,6 +59,29 @@ export interface Database {
           description?: string | null
           id?: number
           name?: string
+        }
+      }
+      members: {
+        Row: {
+          alias: string
+          created_at: string
+          group_id: number
+          id: number
+          is_admin: boolean
+        }
+        Insert: {
+          alias: string
+          created_at?: string
+          group_id: number
+          id?: number
+          is_admin?: boolean
+        }
+        Update: {
+          alias?: string
+          created_at?: string
+          group_id?: number
+          id?: number
+          is_admin?: boolean
         }
       }
     }
