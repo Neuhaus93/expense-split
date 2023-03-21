@@ -19,9 +19,9 @@ const HomePage: React.FC = () => {
     );
 
     return (
-        <Box sx={{ maxWidth: "820px", mx: "auto" }}>
+        <div>
             <div>
-                <Typography level="h3" sx={{ mt: 3, mb: 2 }}>
+                <Typography level="h3" sx={{ mb: 2 }}>
                     Groups
                 </Typography>
 
@@ -117,7 +117,7 @@ const HomePage: React.FC = () => {
                     Create group
                 </Button>
             </Box>
-        </Box>
+        </div>
     );
 };
 

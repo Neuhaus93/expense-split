@@ -1,4 +1,5 @@
-import { Box, BoxProps, Button, Link } from "@mui/joy";
+import ColorSchemeToggle from "$/components/ColorThemeToggle";
+import { Box, BoxProps, Button, Link, useColorScheme } from "@mui/joy";
 import { useState } from "react";
 import { Link as RouterLink, Outlet } from "react-router-dom";
 import { supabase } from "../api/supabase";
@@ -12,6 +13,7 @@ function Header(props: BoxProps) {
             sx={[
                 {
                     p: 2,
+                    px: 5,
                     gap: 2,
                     bgcolor: "background.surface",
                     display: "flex",
@@ -33,6 +35,7 @@ function Header(props: BoxProps) {
 
 const Layout = () => {
     const [loading, setLoading] = useState(false);
+    const { mode, setMode } = useColorScheme();
 
     /**
      * Handles session logout
@@ -55,17 +58,22 @@ const Layout = () => {
                 >
                     Expense Splitter
                 </Link>
-                <Button
-                    color="neutral"
-                    size="sm"
-                    variant="plain"
-                    onClick={handleLogout}
-                    loading={loading}
-                >
-                    Log out
-                </Button>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <ColorSchemeToggle />
+                    <Button
+                        color="neutral"
+                        size="sm"
+                        variant="plain"
+                        onClick={handleLogout}
+                        loading={loading}
+                    >
+                        Log out
+                    </Button>
+                </Box>
             </Header>
-            <Outlet />
+            <Box sx={{ maxWidth: "820px", mx: "auto", mt: 3 }}>
+                <Outlet />
+            </Box>
         </Box>
     );
 };

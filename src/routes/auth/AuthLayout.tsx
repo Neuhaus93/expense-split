@@ -1,16 +1,16 @@
-import { Divider, useColorScheme } from "@mui/joy";
+import { supabase } from "$/api/supabase";
+import ColorSchemeToggle from "$/components/ColorThemeToggle";
+import { Divider } from "@mui/joy";
 import Box from "@mui/joy/Box";
 import Button from "@mui/joy/Button";
 import FormControl from "@mui/joy/FormControl";
 import FormLabel, { formLabelClasses } from "@mui/joy/FormLabel";
-import IconButton, { IconButtonProps } from "@mui/joy/IconButton";
 import Input from "@mui/joy/Input";
 import Link from "@mui/joy/Link";
 import Typography from "@mui/joy/Typography";
+import type { SignUpWithPasswordCredentials } from "@supabase/supabase-js";
 import React, { useEffect, useRef, useState } from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
-import { supabase } from "$/api/supabase";
-import type { SignUpWithPasswordCredentials } from "@supabase/supabase-js";
 
 interface FormElements extends HTMLFormControlsCollection {
     email: HTMLInputElement;
@@ -263,43 +263,6 @@ const AuthLayout: React.FC<AuthLayoutProps> = (props) => {
                 })}
             />
         </React.Fragment>
-    );
-};
-
-const ColorSchemeToggle: React.FC<IconButtonProps> = ({
-    onClick,
-    ...props
-}) => {
-    const { mode, setMode } = useColorScheme();
-    const [mounted, setMounted] = React.useState(false);
-
-    React.useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    if (!mounted) {
-        return (
-            <IconButton size="sm" variant="plain" color="neutral" disabled />
-        );
-    }
-    return (
-        <IconButton
-            id="toggle-mode"
-            size="sm"
-            variant="plain"
-            color="neutral"
-            {...props}
-            onClick={(event) => {
-                if (mode === "light") {
-                    setMode("dark");
-                } else {
-                    setMode("light");
-                }
-                onClick?.(event);
-            }}
-        >
-            {mode === "light" ? "Dark" : "Light"}
-        </IconButton>
     );
 };
 
