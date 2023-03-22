@@ -1,16 +1,17 @@
 import { supabase } from "$/api/supabase";
 import type { Expenses } from "$/types";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "./queryKeys";
 
 type UseExpensesArgs = {
     params: {
-        groupId?: number;
+        groupId: number;
     };
 };
 
 export const useExpenses = (params: UseExpensesArgs["params"]) => {
     return useQuery({
-        queryKey: ["expenses", params],
+        ...queryKeys.expenses.all(params.groupId),
         queryFn: async () => {
             const res = await supabase
                 .from("expenses")

@@ -12,7 +12,7 @@ const createGroupInitialValues = {
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
 
-    const { data } = useGroups();
+    const { data: groups } = useGroups();
     const { mutateAsync, isLoading } = useCreateGroup();
     const [createGroupValues, setCreateGroupValues] = useState(
         createGroupInitialValues
@@ -25,9 +25,9 @@ const HomePage: React.FC = () => {
                     Groups
                 </Typography>
 
-                {data?.result ? (
+                {groups ? (
                     <Grid container spacing={2}>
-                        {data.result.map((group) => {
+                        {groups.map((group) => {
                             return (
                                 <Grid xs={12} sm={6} key={group.id}>
                                     <Card

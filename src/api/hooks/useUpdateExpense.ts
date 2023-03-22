@@ -2,6 +2,7 @@ import { supabase } from "$/api/supabase";
 import { queryClient } from "$/context/QueryClient";
 import type { Expenses, ExpensesTable } from "$/types";
 import { useMutation } from "@tanstack/react-query";
+import { queryKeys } from "./queryKeys";
 
 export const useUpdateExpense = () => {
     return useMutation({
@@ -22,10 +23,9 @@ export const useUpdateExpense = () => {
         },
         onSuccess(data) {
             // For now, just invalidate the expenses list
-            queryClient.invalidateQueries([
-                "expenses",
-                { groupId: data.group_id },
-            ]);
+            queryClient.invalidateQueries(
+                queryKeys.expenses.all(data.group_id).queryKey
+            );
 
             // TODO: Update expense into expenses list
 

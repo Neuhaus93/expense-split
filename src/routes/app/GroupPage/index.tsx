@@ -19,7 +19,7 @@ const GroupPage = () => {
         params: { id: Number(groupId) },
     });
     const { data: expenses } = useExpenses({
-        groupId: group?.id,
+        groupId: Number(groupId),
     });
 
     if (status === "loading") {

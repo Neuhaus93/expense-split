@@ -1,19 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "$/api/supabase";
+import { queryKeys } from "./queryKeys";
 
 export const useGroups = () => {
     return useQuery({
-        queryKey: ["groups"],
+        ...queryKeys.groups.all,
         queryFn: async () => {
             const res = await supabase
                 .from("groups")
                 .select()
                 .order("created_at", { ascending: false });
 
-            return {
-                count: res.count,
-                result: res.data,
-            };
+            if (!Array.isArray(res.data)) {
+                throw new Error("Error finding groups");
+            }
+
+            return res.data;
         },
     });
 };

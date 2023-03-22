@@ -1,10 +1,11 @@
 import { supabase } from "$/api/supabase";
 import { Group } from "$/types";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "./queryKeys";
 
 type UseGroup = {
     params: {
-        id?: number;
+        id: number;
     };
 };
 
@@ -19,7 +20,7 @@ export const useGroup = (args = {} as UseGroup) => {
     const { params } = args;
 
     return useQuery({
-        queryKey: ["group", params],
+        ...queryKeys.groups.byId(params.id),
         queryFn: async () => {
             const res = await getGroup(params);
 
