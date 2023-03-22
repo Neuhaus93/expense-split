@@ -1,7 +1,7 @@
-import { format } from "date-fns";
+import dayjs from "dayjs";
 
 export const formatDateForDateInput = (date: Date): string => {
-    return format(date, "yyyy-MM-dd");
+    return dayjs(date).format("YYYY-MM-DD");
 };
 
 export const formatDate = (dateStr: string) => {
