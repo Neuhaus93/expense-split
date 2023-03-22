@@ -2,14 +2,16 @@ import { supabase } from "$/api/supabase";
 import { queryClient } from "$/context/QueryClient";
 import type { Expenses, ExpensesTable } from "$/types";
 import { useMutation } from "@tanstack/react-query";
-// import dayjs from "dayjs";
 
-export const useCreateExpense = () => {
+export const useUpdateExpense = () => {
     return useMutation({
-        mutationFn: async (values: ExpensesTable["Insert"]) => {
+        mutationFn: async (
+            values: ExpensesTable["Update"] & { id: number }
+        ) => {
             const response = await supabase
                 .from("expenses")
-                .insert(values)
+                .update(values)
+                .eq("id", values.id)
                 .select();
 
             if (Array.isArray(response.data) && response.data.length > 0) {
@@ -25,13 +27,13 @@ export const useCreateExpense = () => {
                 { groupId: data.group_id },
             ]);
 
-            // TODO: Optimisticly update the list
-            // // Cancel any outgoing refetches
+            // TODO: Update expense into expenses list
+
+            // Cancel any outgoing refetches
             // queryClient.cancelQueries({
             //     queryKey: ["expenses", { groupId: data.group_id }],
             // });
 
-            // // Insert new expense into expenses list
             // queryClient.setQueryData<Expenses>(
             //     ["expenses", { groupId: data.group_id }],
             //     (old) => {
@@ -45,13 +47,3 @@ export const useCreateExpense = () => {
         },
     });
 };
-
-// function sortExpenses(expenses: Expenses) {
-//     return (
-//         expenses
-//             .map((e) => ({ ...e, _sort: dayjs(e.date).unix() }))
-//             .sort((a, b) => b._sort - a._sort)
-//             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//             .map(({ _sort, ...rest }) => rest)
-//     );
-// }

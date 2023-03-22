@@ -1,6 +1,6 @@
-import { useExpenses, type Expenses } from "$/api/hooks/useExpenses";
+import { useExpenses } from "$/api/hooks/useExpenses";
 import { useGroup } from "$/api/hooks/useGroup";
-import type { Group } from "$/types";
+import type { Group, Expenses } from "$/types";
 import { formatCents } from "$/utils/currency";
 import { formatDate } from "$/utils/date";
 import { Box, Button, Sheet, Typography } from "@mui/joy";
@@ -11,7 +11,10 @@ import CreateExpenseDialog from "./components/CreateExpenseDialog";
 const GroupPage = () => {
     const { groupId } = useParams();
 
-    const [createExpenseOpen, setCreateExpenseOpen] = useState(false);
+    const [expenseDialog, setExpenseDialog] = useState({
+        open: false,
+        expense: null as Expenses[number] | null,
+    });
     const { data: group, status } = useGroup({
         params: { id: Number(groupId) },
     });
@@ -34,16 +37,28 @@ const GroupPage = () => {
             {group.description && <Typography>{group.description}</Typography>}
 
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button onClick={() => setCreateExpenseOpen(true)}>
+                <Button
+                    onClick={() =>
+                        setExpenseDialog({ open: true, expense: null })
+                    }
+                >
                     Create Expense
                 </Button>
             </Box>
 
-            <ExpensesList expenses={expenses} members={group.members} />
+            <ExpensesList
+                expenses={expenses}
+                members={group.members}
+                onExpenseClick={(expense) =>
+                    setExpenseDialog({ open: true, expense })
+                }
+            />
 
             <CreateExpenseDialog
-                open={createExpenseOpen}
-                onClose={() => setCreateExpenseOpen(false)}
+                key={String(expenseDialog.open)}
+                expense={expenseDialog.expense}
+                open={expenseDialog.open}
+                onClose={() => setExpenseDialog({ open: false, expense: null })}
                 group={group}
             />
         </div>
@@ -51,9 +66,10 @@ const GroupPage = () => {
 };
 
 const ExpensesList: React.FC<{
-    expenses: Expenses;
+    expenses: Expenses | undefined;
     members: NonNullable<Group>["members"];
-}> = ({ expenses, members }) => {
+    onExpenseClick: (expense: Expenses[number]) => void;
+}> = ({ expenses, members, onExpenseClick }) => {
     /**
      * Get the member alias given the member id
      */
@@ -82,11 +98,13 @@ const ExpensesList: React.FC<{
                 <Sheet
                     variant="outlined"
                     key={expense.id}
+                    onClick={() => onExpenseClick(expense)}
                     sx={{
                         borderRadius: 8,
                         p: 1.5,
                         display: "flex",
                         justifyContent: "space-between",
+                        cursor: "pointer",
                     }}
                 >
                     <div>

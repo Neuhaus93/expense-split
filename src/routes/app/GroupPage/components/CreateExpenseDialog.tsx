@@ -1,5 +1,6 @@
 import { useCreateExpense } from "$/api/hooks/useCreateExpense";
-import type { Group } from "$/types";
+import { useUpdateExpense } from "$/api/hooks/useUpdateExpense";
+import type { Expenses, Group } from "$/types";
 import { formatDateForDateInput } from "$/utils/date";
 import {
     Box,
@@ -19,9 +20,8 @@ import {
     Typography,
     type ModalProps,
 } from "@mui/joy";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { NumericFormat } from "react-number-format";
 
 type FormData = {
     name: string;
@@ -30,21 +30,34 @@ type FormData = {
 };
 
 type CreateExpenseDialogProps = {
-    group: NonNullable<Group>;
+    group: Group;
+    expense: Expenses[number] | null;
 } & Omit<ModalProps, "children">;
 
 const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
-    const { group, open, onClose } = props;
-    const { isLoading, mutateAsync } = useCreateExpense();
+    const { group, expense, open, onClose } = props;
+    const isCreate = expense === null;
+    const { isLoading: isLoadingCreate, mutateAsync: mutateAsyncCreate } =
+        useCreateExpense();
+    const { isLoading: isLoadingUpdate, mutateAsync: mutateAsyncUpdate } =
+        useUpdateExpense();
 
-    const [paidBy, setPaidBy] = useState(group.members[0]?.id);
+    const defaultValues = useMemo(() => {
+        return getDefaultValues({ expense, group });
+    }, [expense, group]);
+
+    const text = getText({ isCreate });
+
+    const [paidBy, setPaidBy] = useState(defaultValues.paid_by);
     const [splitWith, setSplitWith] = useState<Record<number, boolean>>(
-        group.members.reduce((prev, cur) => ({ ...prev, [cur.id]: true }), {})
+        defaultValues.split_with
     );
 
-    const { handleSubmit, register, setValue } = useForm<FormData>({
+    const { handleSubmit, register } = useForm<FormData>({
         defaultValues: {
-            date: formatDateForDateInput(new Date()),
+            name: defaultValues.name,
+            value: defaultValues.value,
+            date: defaultValues.date,
         },
     });
 
@@ -59,11 +72,10 @@ const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
         const splittedWithMembers = Object.keys(splitWith).filter(
             (id) => !!splitWith[Number(id)]
         );
-        const cents = Number(data.value) * 100;
+        const cents = Math.abs(Math.floor(Number(data.value) * 100));
         const eachMemberValue = Math.floor(cents / splittedWithMembers.length);
         const rest = cents - eachMemberValue * splittedWithMembers.length;
-
-        await mutateAsync({
+        const payload = {
             name: data.name,
             date: data.date,
             cents: cents,
@@ -73,7 +85,13 @@ const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
                 member_id: Number(memberId),
                 cents: index === 0 ? eachMemberValue + rest : eachMemberValue,
             })),
-        });
+        };
+
+        if (isCreate) {
+            await mutateAsyncCreate(payload);
+        } else {
+            await mutateAsyncUpdate({ ...payload, id: expense.id });
+        }
         (onClose as any)();
     });
 
@@ -97,7 +115,7 @@ const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
                     }}
                 />
                 <Typography level="h5" fontWeight="bold" sx={{ mb: 3 }}>
-                    Create Expense
+                    {text.title}
                 </Typography>
                 <Box>
                     <form onSubmit={onSubmit}>
@@ -112,14 +130,24 @@ const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
                                     />
                                 </FormControl>
 
-                                <FormControl required>
+                                <FormControl>
                                     <FormLabel>Value</FormLabel>
-                                    <NumericFormat
+                                    <Input
+                                        type="number"
+                                        startDecorator={"R$"}
+                                        slotProps={{
+                                            input: {
+                                                ...register("value"),
+                                                step: 0.01,
+                                            },
+                                        }}
+                                    />
+                                    {/* <NumericFormat
                                         decimalScale={2}
                                         startDecorator={"R$"}
-                                        onValueChange={(values) => {
-                                            setValue("value", values.value);
-                                        }}
+                                        onValueChange={(values) =>
+                                            setValue("value", values.value)
+                                        }
                                         slotProps={{
                                             input: {
                                                 type: "number",
@@ -128,7 +156,7 @@ const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
                                         }}
                                         customInput={Input}
                                         allowNegative={false}
-                                    />
+                                    /> */}
                                 </FormControl>
 
                                 <FormControl required>
@@ -189,9 +217,9 @@ const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
                                 <Button
                                     type="submit"
                                     sx={{ mt: 1 }}
-                                    loading={isLoading}
+                                    loading={isLoadingCreate || isLoadingUpdate}
                                 >
-                                    Create expense
+                                    {text.button}
                                 </Button>
                             </Grid>
                         </Grid>
@@ -201,5 +229,33 @@ const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
         </Modal>
     );
 };
+
+function getText({ isCreate }: { isCreate: boolean }) {
+    return {
+        title: isCreate ? "Create Expense" : "Update Expense",
+        button: isCreate ? "Create expense" : "Update expense",
+    };
+}
+
+function getDefaultValues({
+    expense,
+    group,
+}: Pick<CreateExpenseDialogProps, "expense" | "group">) {
+    return {
+        paid_by: expense?.paid_by ?? group.members[0]?.id,
+        split_with: expense?.paid_to
+            ? expense?.paid_to.reduce(
+                  (prev, cur) => ({ ...prev, [cur.member_id]: true }),
+                  {}
+              )
+            : group.members.reduce(
+                  (prev, cur) => ({ ...prev, [cur.id]: true }),
+                  {}
+              ),
+        name: expense?.name ?? "",
+        value: expense?.cents ? String(expense.cents / 100) : "",
+        date: expense?.date ?? formatDateForDateInput(new Date()),
+    };
+}
 
 export default CreateExpenseDialog;

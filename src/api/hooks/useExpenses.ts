@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "$/api/supabase";
+import type { Expenses } from "$/types";
+import { useQuery } from "@tanstack/react-query";
 
 type UseExpensesArgs = {
     params: {
@@ -21,13 +22,11 @@ export const useExpenses = (params: UseExpensesArgs["params"]) => {
                 throw new Error("Expenses not found");
             }
 
-            return res.data;
+            return res.data as Expenses;
         },
         enabled: verifyId(params.groupId),
     });
 };
-
-export type Expenses = ReturnType<typeof useExpenses>["data"];
 
 function verifyId(id: number | undefined) {
     return typeof id === "number" && !isNaN(id);

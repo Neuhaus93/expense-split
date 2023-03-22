@@ -12,5 +12,13 @@ export type MembersRow = Database["public"]["Tables"]["members"]["Row"];
 export type GroupsRow = Database["public"]["Tables"]["groups"]["Row"];
 export type ExpensesRow = Database["public"]["Tables"]["expenses"]["Row"];
 
-// Request results
+// Success Request results
 export type Group = GroupsRow & { members: MembersRow[] };
+export type Expenses = Array<
+    Omit<ExpensesRow, "paid_to"> & {
+        paid_to: {
+            member_id: number;
+            cents: number;
+        }[];
+    }
+>;
