@@ -1,5 +1,5 @@
 import { useCreateExpense } from "$/api/hooks/useCreateExpense";
-import { type Group } from "$/api/hooks/useGroup";
+import type { Group } from "$/types";
 import { formatDateForDateInput } from "$/utils/date";
 import {
     Box,
@@ -19,7 +19,7 @@ import {
     Typography,
     type ModalProps,
 } from "@mui/joy";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
 
@@ -35,22 +35,11 @@ type CreateExpenseDialogProps = {
 
 const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
     const { group, open, onClose } = props;
-    const { mutate, isSuccess, isLoading } = useCreateExpense();
+    const { isLoading, mutateAsync } = useCreateExpense();
 
-    useEffect(() => {
-        if (isSuccess) {
-            (onClose as any)();
-        }
-    }, [isSuccess, onClose]);
-
-    const members =
-        Array.isArray(group.members) && group.members.length > 0
-            ? group.members
-            : [];
-
-    const [paidBy, setPaidBy] = useState(members[0]?.id);
+    const [paidBy, setPaidBy] = useState(group.members[0]?.id);
     const [splitWith, setSplitWith] = useState<Record<number, boolean>>(
-        members.reduce((prev, cur) => ({ ...prev, [cur.id]: true }), {})
+        group.members.reduce((prev, cur) => ({ ...prev, [cur.id]: true }), {})
     );
 
     const { handleSubmit, register, setValue } = useForm<FormData>({
@@ -66,7 +55,7 @@ const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
         }));
     };
 
-    const onSubmit = handleSubmit((data) => {
+    const onSubmit = handleSubmit(async (data) => {
         const splittedWithMembers = Object.keys(splitWith).filter(
             (id) => !!splitWith[Number(id)]
         );
@@ -74,7 +63,7 @@ const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
         const eachMemberValue = Math.floor(cents / splittedWithMembers.length);
         const rest = cents - eachMemberValue * splittedWithMembers.length;
 
-        mutate({
+        await mutateAsync({
             name: data.name,
             date: data.date,
             cents: cents,
@@ -85,6 +74,7 @@ const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
                 cents: index === 0 ? eachMemberValue + rest : eachMemberValue,
             })),
         });
+        (onClose as any)();
     });
 
     return (
@@ -159,7 +149,7 @@ const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
                                             setPaidBy(newValue)
                                         }
                                     >
-                                        {members.map((member) => (
+                                        {group.members.map((member) => (
                                             <Option
                                                 key={member.id}
                                                 value={member.id}
@@ -175,7 +165,7 @@ const CreateExpenseDialog: React.FC<CreateExpenseDialogProps> = (props) => {
                                 <FormLabel>Split between</FormLabel>
                                 <Box role="group">
                                     <List size="sm">
-                                        {members?.map((member) => (
+                                        {group.members?.map((member) => (
                                             <ListItem key={member.id}>
                                                 <Checkbox
                                                     label={member.alias}

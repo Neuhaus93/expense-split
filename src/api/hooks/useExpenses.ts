@@ -15,16 +15,13 @@ export const useExpenses = (params: UseExpensesArgs["params"]) => {
                 .from("expenses")
                 .select()
                 .eq("group_id", params.groupId)
-                .order("created_at", { ascending: false });
+                .order("date", { ascending: false });
 
             if (!Array.isArray(res.data)) {
                 throw new Error("Expenses not found");
             }
 
-            return {
-                count: res.count,
-                result: res.data,
-            };
+            return res.data;
         },
         enabled: verifyId(params.groupId),
     });

@@ -1,5 +1,6 @@
 import { useExpenses, type Expenses } from "$/api/hooks/useExpenses";
-import { useGroup, type Group } from "$/api/hooks/useGroup";
+import { useGroup } from "$/api/hooks/useGroup";
+import type { Group } from "$/types";
 import { formatCents } from "$/utils/currency";
 import { formatDate } from "$/utils/date";
 import { Box, Button, Sheet, Typography } from "@mui/joy";
@@ -64,7 +65,7 @@ const ExpensesList: React.FC<{
         return members.find((member) => member.id === id)?.alias;
     };
 
-    if (!expenses?.result) {
+    if (!expenses) {
         return null;
     }
 
@@ -77,7 +78,7 @@ const ExpensesList: React.FC<{
                 },
             }}
         >
-            {expenses.result.map((expense) => (
+            {expenses.map((expense) => (
                 <Sheet
                     variant="outlined"
                     key={expense.id}

@@ -1,4 +1,5 @@
 import { supabase } from "$/api/supabase";
+import { Group } from "$/types";
 import { useQuery } from "@tanstack/react-query";
 
 type UseGroup = {
@@ -7,30 +8,30 @@ type UseGroup = {
     };
 };
 
-export const groupQuery = (params: UseGroup["params"]) => ({
-    queryKey: ["group", params],
-    queryFn: async () => {
-        const res = await supabase
-            .from("groups")
-            .select("*, members(*)")
-            .eq("id", Number(params?.id));
-
-        if (!Array.isArray(res.data) || res.data?.length === 0) {
-            throw new Error("Group not found");
-        }
-
-        return res.data[0];
-    },
-    enabled: verifyId(params?.id),
-});
+async function getGroup(params: UseGroup["params"]) {
+    return await supabase
+        .from("groups")
+        .select("*, members(*)")
+        .eq("id", Number(params?.id));
+}
 
 export const useGroup = (args = {} as UseGroup) => {
     const { params } = args;
 
-    return useQuery(groupQuery(params));
-};
+    return useQuery({
+        queryKey: ["group", params],
+        queryFn: async () => {
+            const res = await getGroup(params);
 
-export type Group = ReturnType<typeof useGroup>["data"];
+            if (!Array.isArray(res.data)) {
+                throw new Error("Group not found");
+            }
+
+            return res.data?.[0] as Group;
+        },
+        enabled: verifyId(params?.id),
+    });
+};
 
 function verifyId(id: number | undefined) {
     return typeof id === "number" && !isNaN(id);
